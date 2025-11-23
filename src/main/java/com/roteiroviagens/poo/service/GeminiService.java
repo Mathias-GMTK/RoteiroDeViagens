@@ -17,7 +17,7 @@ import java.util.Map;
 public class GeminiService {
 
 
-    private static final String API_KEY = "AIzaSyBWkgGrp1ChzzicbCukc5sjzHqrE-5JhSU";
+    private static final String API_KEY = "Coloque sua chave aqui!!!";
 
     // Trocamos para a versão exata "001" na v1beta
     // Atualizado para a versão 2.5 que aparece na sua lista
