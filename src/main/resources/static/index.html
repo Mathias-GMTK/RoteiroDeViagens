@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Travel Planner</title>
+
+    <!-- Bootstrap 5 & Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Fonte Moderna -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root { --primary-color: #0d6efd; --bg-overlay: rgba(15, 23, 42, 0.6); }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            /* Imagem de fundo inspiradora */
+            background: url('https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=2021&auto=format&fit=crop') no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .main-wrapper { background-color: var(--bg-overlay); min-height: 100vh; padding-bottom: 80px; }
+
+        /* Efeito de Vidro (Glassmorphism) */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+        }
+
+        .hero-header {
+            background: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%);
+            padding: 30px;
+            color: white;
+            text-align: center;
+        }
+
+        /* ABAS DE NAVEGAÇÃO */
+        .nav-pills .nav-link {
+            color: white;
+            border-radius: 50px;
+            padding: 10px 25px;
+            margin: 0 5px;
+            font-weight: 600;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.1);
+            transition: all 0.3s;
+        }
+        .nav-pills .nav-link:hover { background: rgba(255,255,255,0.2); }
+        .nav-pills .nav-link.active {
+            background-color: white;
+            color: #2563eb;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .nav-container { display: flex; justify-content: center; margin-bottom: 30px; }
+
+        /* ITEM DO HISTÓRICO */
+        .history-item {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.2s;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .history-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+            border-color: #2563eb;
+        }
+        .history-info { flex-grow: 1; }
+        .history-dest { font-weight: 700; font-size: 1.1rem; color: #1e293b; }
+        .history-date { font-size: 0.85rem; color: #64748b; margin-top: 5px; }
+
+        /* BOTÃO DE LIXEIRA */
+        .btn-delete {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background-color: #fee2e2; /* Vermelho claro */
+            color: #ef4444; /* Vermelho escuro */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            margin-right: 10px;
+        }
+        .btn-delete:hover {
+            background-color: #ef4444;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        /* INPUTS */
+        .form-control, .form-select { border-radius: 12px; padding: 12px; border: 2px solid #e2e8f0; transition: 0.3s; }
+        .form-control:focus { border-color: #2563eb; box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); }
+
+        /* CARTÕES DE ESTILO (RADIO BUTTONS) */
+        .style-selector input[type="radio"] { display: none; }
+        .style-card {
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: white;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .style-card i { font-size: 1.5rem; margin-bottom: 8px; color: #64748b; }
+        .style-card span { font-weight: 600; font-size: 0.9rem; }
+
+        .style-selector input[type="radio"]:checked + label .style-card {
+            border-color: #2563eb;
+            background: #eff6ff;
+            color: #2563eb;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+            transform: translateY(-2px);
+        }
+        .style-selector input[type="radio"]:checked + label .style-card i { color: #2563eb; }
+
+        /* BOTÃO GERAR */
+        .btn-generate {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            width: 100%;
+            margin-top: 20px;
+            transition: transform 0.2s;
+        }
+        .btn-generate:hover { transform: translateY(-2px); box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.4); }
+
+        /* LINHA DO TEMPO (RESULTADO) */
+        .timeline { position: relative; padding-left: 30px; }
+        .timeline::before { content: ''; position: absolute; left: 0; top: 10px; bottom: 0; width: 4px; background: #e2e8f0; border-radius: 2px; }
+        .timeline-item { position: relative; margin-bottom: 40px; }
+        .timeline-dot { position: absolute; left: -36px; top: 0; width: 16px; height: 16px; border-radius: 50%; background: #2563eb; border: 4px solid #fff; box-shadow: 0 0 0 2px #2563eb; }
+        .timeline-card { background: white; border-radius: 16px; overflow: hidden; border: 1px solid #f1f5f9; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+
+        .period-box { background: #f8fafc; border-radius: 12px; padding: 15px; margin-bottom: 10px; border-left: 4px solid #ddd; }
+        .period-morning { border-left-color: #fbbf24; }
+        .period-afternoon { border-left-color: #f97316; }
+        .period-night { border-left-color: #4f46e5; }
+
+        .loader-wrapper { display: none; text-align: center; padding: 60px 20px; color: white; }
+        .plane-anim { font-size: 3rem; animation: float 2s infinite ease-in-out; display: inline-block; }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+    </style>
+</head>
+<body>
+
+<div class="main-wrapper">
+    <div class="container pt-4">
+
+        <!-- MENU DE ABAS -->
+        <div class="nav-container">
+            <ul class="nav nav-pills">
+                <li class="nav-item">
+                    <button class="nav-link active" onclick="mostrarAba('novo')"><i class="bi bi-plus-circle me-2"></i>Novo Roteiro</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" onclick="mostrarAba('historico')"><i class="bi bi-clock-history me-2"></i>Histórico</button>
+                </li>
+            </ul>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-md-10">
+
+                <!-- === ABA 1: FORMULÁRIO NOVO ROTEIRO === -->
+                <div id="aba-novo">
+                    <div class="glass-card mb-5" id="inputArea">
+                        <div class="hero-header">
+                            <h1 class="fw-bold mb-2"><i class="bi bi-airplane-engines me-2"></i>AI Travel Planner</h1>
+                            <p class="mb-0 opacity-75">Sua próxima aventura começa aqui</p>
+                        </div>
+                        <div class="card-body p-4 p-md-5">
+                            <form id="viagemForm">
+                                <div class="row g-4">
+                                    <!-- Destino -->
+                                    <div class="col-12">
+                                        <label class="form-label text-uppercase small fw-bold text-muted">Qual o destino?</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-white"><i class="bi bi-geo-alt-fill text-danger"></i></span>
+                                            <input type="text" class="form-control" id="destino" placeholder="Ex: Paris, Tóquio, Salvador..." required>
+                                        </div>
+                                    </div>
+
+                                    <!-- Dias e Orçamento -->
+                                    <div class="col-md-6">
+                                        <label class="form-label text-uppercase small fw-bold text-muted">Duração (Dias)</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-white"><i class="bi bi-calendar-event"></i></span>
+                                            <input type="number" class="form-control" id="dias" value="3" min="1" max="30" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label text-uppercase small fw-bold text-muted">Orçamento (R$)</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-white text-success">R$</span>
+                                            <input type="number" class="form-control" id="orcamento" placeholder="Ex: 5000" required>
+                                        </div>
+                                    </div>
+
+                                    <!-- Estilo (Grid de Opções) -->
+                                    <div class="col-12">
+                                        <label class="form-label text-uppercase small fw-bold text-muted mb-3">Estilo da Viagem</label>
+                                        <div class="row g-3 style-selector">
+                                            <div class="col-6 col-md-4">
+                                                <input type="radio" name="estilo" id="e1" value="Econômico" checked>
+                                                <label for="e1" class="w-100"><div class="style-card"><i class="bi bi-piggy-bank"></i><span>Econômico</span></div></label>
+                                            </div>
+                                            <div class="col-6 col-md-4">
+                                                <input type="radio" name="estilo" id="e2" value="Luxo">
+                                                <label for="e2" class="w-100"><div class="style-card"><i class="bi bi-gem"></i><span>Luxo</span></div></label>
+                                            </div>
+                                            <div class="col-6 col-md-4">
+                                                <input type="radio" name="estilo" id="e3" value="Aventura">
+                                                <label for="e3" class="w-100"><div class="style-card"><i class="bi bi-tree"></i><span>Aventura</span></div></label>
+                                            </div>
+                                            <div class="col-6 col-md-4">
+                                                <input type="radio" name="estilo" id="e4" value="Cultural">
+                                                <label for="e4" class="w-100"><div class="style-card"><i class="bi bi-bank"></i><span>Cultural</span></div></label>
+                                            </div>
+                                            <div class="col-6 col-md-4">
+                                                <input type="radio" name="estilo" id="e5" value="Romântico">
+                                                <label for="e5" class="w-100"><div class="style-card"><i class="bi bi-heart"></i><span>Romântico</span></div></label>
+                                            </div>
+                                            <div class="col-6 col-md-4">
+                                                <input type="radio" name="estilo" id="e6" value="Gastronômico">
+                                                <label for="e6" class="w-100"><div class="style-card"><i class="bi bi-cup-hot"></i><span>Gourmet</span></div></label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <button type="submit" class="btn-generate">GERAR ROTEIRO MÁGICO ✨</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- === ABA 2: HISTÓRICO === -->
+                <div id="aba-historico" style="display: none;">
+                    <div class="glass-card p-4">
+                        <div class="d-flex align-items-center mb-4 ps-2 border-start border-4 border-primary">
+                            <h3 class="fw-bold mb-0 text-dark">Minhas Viagens</h3>
+                        </div>
+                        <!-- LISTA VAI AQUI -->
+                        <div id="listaHistorico">
+                            <div class="text-center text-muted py-5">
+                                <div class="spinner-border text-primary" role="status"></div>
+                                <p class="mt-2">Carregando viagens...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TELA DE CARREGAMENTO -->
+                <div class="loader-wrapper" id="loading">
+                    <div class="plane-anim"><i class="bi bi-airplane-fill"></i></div>
+                    <h3 class="fw-bold mt-3">Criando seu roteiro...</h3>
+                    <p class="opacity-75">Consultando as melhores opções para você.</p>
+                </div>
+
+                <!-- TELA DE RESULTADO (TIMELINE) -->
+                <div id="resultadoArea" style="display: none;">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2 class="text-white fw-bold mb-0 text-shadow">🗺️ Seu Roteiro</h2>
+                        <button class="btn btn-light rounded-pill px-4 fw-bold shadow-sm" onclick="mostrarAba('novo')">
+                            <i class="bi bi-arrow-left me-2"></i>Voltar
+                        </button>
+                    </div>
+                    <div class="timeline" id="conteudoRoteiro"></div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- Gerenciamento de Abas ---
+    function mostrarAba(aba) {
+        document.getElementById('resultadoArea').style.display = 'none';
+        document.getElementById('loading').style.display = 'none';
+
+        document.querySelectorAll('.nav-link').forEach(btn => btn.classList.remove('active'));
+
+        if (aba === 'novo') {
+            document.getElementById('aba-novo').style.display = 'block';
+            document.getElementById('aba-historico').style.display = 'none';
+            document.querySelector('.nav-link:first-child').classList.add('active');
+        } else {
+            document.getElementById('aba-novo').style.display = 'none';
+            document.getElementById('aba-historico').style.display = 'block';
+            document.querySelector('.nav-link:last-child').classList.add('active');
+            carregarHistorico(); // Busca dados do backend
+        }
+    }
+
+    // --- Carregar Histórico ---
+    async function carregarHistorico() {
+        const divLista = document.getElementById('listaHistorico');
+
+        try {
+            const response = await fetch('/historico');
+            if(!response.ok) throw new Error("Erro ao buscar");
+            const lista = await response.json();
+
+            if (lista.length === 0) {
+                divLista.innerHTML = `
+                    <div class="text-center py-5">
+                        <i class="bi bi-journal-x text-muted" style="font-size: 3rem;"></i>
+                        <p class="text-muted mt-3">Nenhum roteiro salvo ainda.</p>
+                        <button class="btn btn-primary btn-sm rounded-pill mt-2" onclick="mostrarAba('novo')">Criar o primeiro</button>
+                    </div>`;
+                return;
+            }
+
+            let html = '';
+            // Inverte a lista para mostrar o mais recente primeiro
+            lista.reverse().forEach(item => {
+                html += `
+                    <div class="history-item" onclick="verDetalhes(${item.id})">
+                        <div class="history-info">
+                            <div class="history-dest"><i class="bi bi-geo-alt-fill text-danger me-2"></i>${item.destino}</div>
+                            <div class="history-date">
+                                <span class="badge bg-light text-dark border me-1"><i class="bi bi-calendar me-1"></i>${item.dias} dias</span>
+                                <span class="badge bg-light text-dark border"><i class="bi bi-tag me-1"></i>${item.estilo}</span>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                             <!-- Botão DELETAR (com stopPropagation para não abrir o roteiro ao clicar na lixeira) -->
+                             <button class="btn-delete shadow-sm" onclick="deletarViagem(${item.id}, event)" title="Excluir">
+                                <i class="bi bi-trash"></i>
+                             </button>
+                             <div class="text-primary ms-2"><i class="bi bi-chevron-right fs-5"></i></div>
+                        </div>
+                    </div>
+                `;
+            });
+            divLista.innerHTML = html;
+
+        } catch (error) {
+            console.error(error);
+            divLista.innerHTML = '<p class="text-danger text-center">Erro ao carregar histórico.</p>';
+        }
+    }
+
+    // --- Ver Detalhes ---
+    async function verDetalhes(id) {
+        document.getElementById('aba-historico').style.display = 'none';
+        document.getElementById('loading').style.display = 'block';
+
+        try {
+            const response = await fetch(`/historico/${id}`);
+            const data = await response.json();
+
+            renderizarRoteiro(data.roteiroTexto);
+
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('resultadoArea').style.display = 'block';
+        } catch (e) {
+            alert("Erro ao abrir roteiro");
+            mostrarAba('historico');
+        }
+    }
+
+    // --- Deletar Viagem ---
+    async function deletarViagem(id, event) {
+        event.stopPropagation(); // Evita que o clique abra os detalhes
+
+        if (!confirm("Tem certeza que deseja apagar este roteiro?")) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`/historico/${id}`, { method: 'DELETE' });
+            if (response.ok) {
+                carregarHistorico(); // Recarrega a lista após deletar
+            } else {
+                alert("Erro ao deletar.");
+            }
+        } catch (e) {
+            alert("Erro ao conectar com o servidor.");
+        }
+    }
+
+    // --- Envio do Formulário ---
+    document.getElementById('viagemForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        let estilo = "Econômico";
+        const radio = document.querySelector('input[name="estilo"]:checked');
+        if(radio) estilo = radio.value;
+
+        const dados = {
+            destino: document.getElementById('destino').value,
+            dias: parseInt(document.getElementById('dias').value),
+            orcamento: parseFloat(document.getElementById('orcamento').value),
+            estilo: estilo
+        };
+
+        document.getElementById('aba-novo').style.display = 'none';
+        document.getElementById('loading').style.display = 'block';
+
+        try {
+            const response = await fetch('/Gerar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dados)
+            });
+            const data = await response.json();
+            renderizarRoteiro(data.roteiroTexto);
+
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('resultadoArea').style.display = 'block';
+        } catch (err) {
+            alert('Erro ao gerar roteiro. Verifique o console.');
+            console.error(err);
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('aba-novo').style.display = 'block';
+        }
+    });
+
+    // --- Renderizador de Roteiro (Timeline) ---
+    function renderizarRoteiro(textoJson) {
+        let jsonLimpo = textoJson.replace(/```json/g, "").replace(/```/g, "");
+        const container = document.getElementById('conteudoRoteiro');
+
+        try {
+            const roteiroObj = JSON.parse(jsonLimpo);
+            let html = '';
+
+            const fmt = (c) => {
+                if (!c) return "Livre";
+                if (typeof c === 'object') return Object.values(c).join(", ");
+                return String(c);
+            };
+
+            if (roteiroObj.dias) {
+                roteiroObj.dias.forEach(dia => {
+                    html += `
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-card">
+                                <div class="timeline-header p-3 bg-light border-bottom d-flex justify-content-between">
+                                    <h5 class="mb-0 fw-bold text-primary">Dia ${dia.dia}</h5>
+                                    <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-1 rounded-pill">${dia.tema || ''}</span>
+                                </div>
+                                <div class="p-4">
+                                    <div class="period-box period-morning">
+                                        <h6 class="fw-bold text-warning small text-uppercase mb-2"><i class="bi bi-sunrise me-2"></i>Manhã</h6>
+                                        <p class="mb-0 text-secondary">${fmt(dia.manha)}</p>
+                                    </div>
+                                    <div class="period-box period-afternoon">
+                                        <h6 class="fw-bold small text-uppercase mb-2" style="color:#f97316"><i class="bi bi-sun me-2"></i>Tarde</h6>
+                                        <p class="mb-0 text-secondary">${fmt(dia.tarde)}</p>
+                                    </div>
+                                    <div class="period-box period-night">
+                                        <h6 class="fw-bold text-primary small text-uppercase mb-2"><i class="bi bi-moon-stars me-2"></i>Noite</h6>
+                                        <p class="mb-0 text-secondary">${fmt(dia.noite)}</p>
+                                    </div>
+
+                                    <div class="mt-4 pt-3 border-top d-flex flex-wrap gap-2">
+                                        <span class="badge bg-light text-dark border"><i class="bi bi-cup-hot-fill me-1 text-danger"></i> ${fmt(dia.refeicoes || dia.refeições)}</span>
+                                        <span class="badge bg-light text-dark border"><i class="bi bi-car-front-fill me-1 text-primary"></i> ${fmt(dia.transporte)}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            container.innerHTML = html;
+        } catch (e) {
+            console.error(e);
+            container.innerHTML = `<div class="alert alert-danger">Erro ao processar dados do roteiro.</div>`;
+        }
+    }
+</script>
+
+</body>
+</html>
