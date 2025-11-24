@@ -2,6 +2,8 @@
 
 Um planejador de viagens inteligente que cria roteiros personalizados, detalhados e organizados em segundos, utilizando a potência do modelo Gemini 2.5 Flash do Google.
 
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 🚀 Funcionalidades
 
 ✨ Geração de Roteiros: Criação automática de itinerários baseados em destino, orçamento, dias e estilo de viagem.
@@ -15,6 +17,8 @@ Um planejador de viagens inteligente que cria roteiros personalizados, detalhado
 🗑️ Gerenciamento: Permite visualizar detalhes de viagens passadas e excluir roteiros antigos.
 
 📱 Timeline Visual: Apresentação do roteiro em formato de linha do tempo vertical, separando atividades por períodos (Manhã, Tarde, Noite).
+
+----------------------------------------------------------------------------------------------------------------------------------------------------
 
 🛠️ Tecnologias Utilizadas
 
@@ -38,6 +42,8 @@ JavaScript (ES6+) (Fetch API para comunicação com o Back-end)
 
 Bootstrap Icons
 
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+
 ⚙️ Como Rodar o Projeto
 
 Pré-requisitos
@@ -59,7 +65,6 @@ Se estiver usando IntelliJ/Eclipse, rode a classe PooApplication.java.
 Ou via terminal:
 
 ./mvnw spring-boot:run
-
 
 Acesse no Navegador
 
